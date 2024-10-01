@@ -8,8 +8,7 @@ import org.sportradar.screen.GameScreen;
 import org.sportradar.screen.IScreen;
 import org.sportradar.util.TerminalColors;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -77,5 +76,47 @@ public class WordleTest {
         String actualResult = wordle.guess(guessWord);
         // Then
         assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void shouldInvalidateNumberInUserInput() {
+        // Given
+        String userInput = "1337L";
+        // When
+        boolean notValid = wordle.validateUserInput(userInput);
+        // Then
+        assertFalse(notValid);
+
+    }
+
+    @Test
+    public void shouldAllowNorwegianSpecialCharacters() {
+        // Given
+        String userInput = "ÆÆÆÆÆ";
+        // When
+        boolean valid = wordle.validateUserInput(userInput);
+        // Then
+        assertTrue(valid);
+    }
+
+    @Test
+    public void shouldNotAllowToShortWord() {
+        // Given
+        String userInput = "h";
+        // When
+        boolean inValid = wordle.validateUserInput(userInput);
+        // Then
+        assertFalse(inValid);
+    }
+
+    @Test
+    public void shouldNotAllowToLongWord() {
+        // Given
+        String userInput = "HHHHHHH";
+        // When
+        boolean inValid = wordle.validateUserInput(userInput);
+        // Then
+        assertFalse(inValid);
+
     }
 }
