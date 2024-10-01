@@ -100,8 +100,8 @@ public class Wordle implements IGuessGame {
             case "?" -> this.gameState = GameState.HELP;
             case "Q" -> this.gameState = GameState.END;
             default -> {
-                if (playerInput.length() != correctWord.length()) {
-                    System.out.println(TerminalColors.red(String.format("Invalid input. Please enter a %d-letter word."
+                if (!validateUserInput(playerInput)) {
+                    System.out.println(TerminalColors.red(String.format("Invalid input. Please enter a %d-letter word in the alphabet"
                             , this.correctWord.length())));
                     break;
                 }
@@ -116,6 +116,11 @@ public class Wordle implements IGuessGame {
 
             }
         }
+    }
+
+    public boolean validateUserInput(String input) {
+        String validInput = "^[a-zA-ZæøåÆØÅ]+$";
+        return input.matches(validInput) && input.length() == correctWord.length();
     }
 
     @Override
