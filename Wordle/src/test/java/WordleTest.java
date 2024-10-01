@@ -1,17 +1,14 @@
 import org.junit.Before;
 import org.junit.Test;
-import org.sportradar.enums.LetterResult;
 import org.sportradar.game.IGuessGame;
 import org.sportradar.game.Wordle;
 import org.sportradar.repository.IRepository;
 import org.sportradar.repository.Repository;
 import org.sportradar.screen.GameScreen;
 import org.sportradar.screen.IScreen;
+import org.sportradar.util.TerminalColors;
 
 import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,55 +25,56 @@ public class WordleTest {
         this.wordle = (Wordle) game;
     }
 
-
     @Test
-    public void guess_givesGreenOnCorrectGuess() {
+    public void shouldMarkCorrectLettersAsGreenInGuessOutput() {
         // Given
         String guessWord = "HATER";
-        List<LetterResult> expectedResult = Arrays.asList(
-                LetterResult.INCORRECT, LetterResult.CORRECT, LetterResult.CORRECT, LetterResult.CORRECT, LetterResult.CORRECT
-        );
+        String expectedResult = "[H]"
+                + TerminalColors.green("[A]")
+                + TerminalColors.green("[T]")
+                + TerminalColors.green("[E]")
+                + TerminalColors.green("[R]");
         // When
-        List<LetterResult> actualResult = wordle.getLetterResults(guessWord);
+        String actualResult = wordle.guess(guessWord);
         // Then
         assertEquals(expectedResult, actualResult);
     }
 
     @Test
-    public void guess_givesYellowOnMisplacedGuess() {
+    public void shouldMarkMisplacedLettersAsYellowInGuessOutput() {
         // Given
         String guessWord = "JELLO";
-        List<LetterResult> expectedResult = Arrays.asList(
-                LetterResult.INCORRECT, LetterResult.MISPLACED, LetterResult.INCORRECT, LetterResult.INCORRECT, LetterResult.INCORRECT
-        );
+        String expectedResult = "[J]"
+                + TerminalColors.yellow("[E]")
+                + "[L][L][O]";
         // When
-        List<LetterResult> actualResult = wordle.getLetterResults(guessWord);
+        String actualResult = wordle.guess(guessWord);
         // Then
         assertEquals(expectedResult, actualResult);
     }
 
     @Test
-    public void guess_givesSingleYellowWhenGuessHasDuplicateButWordHasOne() {
+    public void shouldMarkSingleYellowForDuplicateGuess() {
         // Given
         String guessWord = "BEEFY";
-        List<LetterResult> expectedResult = Arrays.asList(
-                LetterResult.INCORRECT, LetterResult.MISPLACED, LetterResult.INCORRECT, LetterResult.INCORRECT, LetterResult.INCORRECT
-        );
+        String expectedResult = "[B]"
+                + TerminalColors.yellow("[E]")
+                + "[E][F][Y]";
         // When
-        List<LetterResult> actualResult = wordle.getLetterResults(guessWord);
+        String actualResult = wordle.guess(guessWord);
         // Then
         assertEquals(expectedResult, actualResult);
     }
 
     @Test
-    public void guess_givesGreenIfGuessHasDuplicateWhereOneIsCorrect() {
+    public void shouldMarkLetterAsGreenWhenDuplicateInGuessIsCorrectlyPlaced() {
         // Given
         String guessWord = "BLEED";
-        List<LetterResult> expectedResult = Arrays.asList(
-                LetterResult.INCORRECT, LetterResult.INCORRECT, LetterResult.INCORRECT, LetterResult.CORRECT, LetterResult.INCORRECT
-        );
+        String expectedResult = "[B][L][E]"
+                + TerminalColors.green("[E]")
+                + "[D]";
         // When
-        List<LetterResult> actualResult = wordle.getLetterResults(guessWord);
+        String actualResult = wordle.guess(guessWord);
         // Then
         assertEquals(expectedResult, actualResult);
     }
