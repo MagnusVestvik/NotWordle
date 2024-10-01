@@ -119,6 +119,9 @@ public class Wordle implements IGuessGame {
     }
 
     public boolean validateUserInput(String input) {
+        if (input.equals("?") || input.equals("Q")) {
+            return true;
+        }
         String validInput = "^[a-zA-ZæøåÆØÅ]+$";
         return input.matches(validInput) && input.length() == correctWord.length();
     }
