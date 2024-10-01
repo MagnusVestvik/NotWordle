@@ -143,7 +143,7 @@ public class Wordle implements IGuessGame {
      * - {@link LetterResult#MISPLACED} if the letter exists in the correct word but is in the wrong position.
      * - {@link LetterResult#INCORRECT} if the letter does not exist in the correct word.
      */
-    public List<LetterResult> getLetterFeedback(String guess) {
+    private List<LetterResult> getLetterFeedback(String guess) {
         List<LetterResult> letterResults = new ArrayList<>(
                 Collections.nCopies(guess.length(), LetterResult.INCORRECT));
         Map<Character, Integer> letterCount = new HashMap<>();
