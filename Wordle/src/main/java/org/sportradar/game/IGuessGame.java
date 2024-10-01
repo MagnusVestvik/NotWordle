@@ -7,5 +7,5 @@ public interface IGuessGame {
 
 	public void play();
 
-	public void guess(String guess);
+	public String guess(String guess);
 }

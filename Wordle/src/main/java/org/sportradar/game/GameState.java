@@ -1,12 +1,10 @@
-package org.sportradar.enums;
-
-import org.sportradar.game.Wordle;
+package org.sportradar.game;
 
 public enum GameState {
-	INITIAL,
-	PLAYING,
-	HELP,
-	WON,
-	LOST,
-	END,
+    INITIAL,
+    PLAYING,
+    HELP,
+    WON,
+    LOST,
+    END,
 }

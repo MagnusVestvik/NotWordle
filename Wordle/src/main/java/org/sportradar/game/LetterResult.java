@@ -1,7 +1,7 @@
-package org.sportradar.enums;
+package org.sportradar.game;
 
 public enum LetterResult {
-	CORRECT,
-	MISPLACED,
-	INCORRECT,
+    CORRECT,
+    MISPLACED,
+    INCORRECT,
 }
