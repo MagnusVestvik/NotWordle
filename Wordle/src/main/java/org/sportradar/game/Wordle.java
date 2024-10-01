@@ -1,7 +1,6 @@
 package org.sportradar.game;
 
-import org.sportradar.enums.GameState;
-import org.sportradar.enums.LetterResult;
+import org.sportradar.constants.GameConstants;
 import org.sportradar.repository.IRepository;
 import org.sportradar.screen.IScreen;
 import org.sportradar.util.TerminalColors;
@@ -41,33 +40,19 @@ public class Wordle implements IGuessGame {
         while (this.gameState != GameState.END) {
             switch (this.gameState) {
                 case INITIAL -> {
-                    System.out.println("Welcome to Wordle!");
-                    System.out.println("Type '?' for help at any time.");
+                    System.out.println(GameConstants.welcomeString);
                     this.gameState = GameState.PLAYING;
                 }
                 case PLAYING -> {
+                    System.out.println("press ? for help, press q to quit");
                     System.out.println(this.gameScreen.drawBoard(currentRound));
                     System.out.print("Enter your guess: ");
                     String playerInput = scanner.nextLine().trim().toUpperCase();
-
-                    if (playerInput.equals("?")) {
-                        this.gameState = GameState.HELP;
-                    } else if (playerInput.length() != correctWord.length()) {
-                        System.out.println("Invalid input. Please enter a "
-                                + correctWord.length() + "-letter word.");
-                    } else {
-                        guess(playerInput);
-                        this.currentRound++;
-                        if (playerInput.equals(correctWord)) {
-                            this.gameState = GameState.WON;
-                        } else if (currentRound >= maxRounds) {
-                            this.gameState = GameState.LOST;
-                        }
-                    }
+                    handlePlayerGuess(playerInput);
                 }
                 case WON -> {
                     System.out.println(this.gameScreen.drawBoard(currentRound));
-                    System.out.println("Congratulations! You've guessed the word correctly.");
+                    System.out.println(GameConstants.wonString);
                     System.out.println("Do you want to play again ? y/n");
                     String playerInput = scanner.nextLine().trim().toUpperCase();
                     if (playerInput.equals("Y")) {
@@ -78,6 +63,7 @@ public class Wordle implements IGuessGame {
                 }
                 case LOST -> {
                     System.out.println(this.gameScreen.drawBoard(currentRound));
+                    System.out.println(GameConstants.lostString);
                     System.out.println("You've used all your guesses. The correct word was: "
                             + correctWord);
                     System.out.println("Do you want to play again ? y/n");
@@ -100,13 +86,42 @@ public class Wordle implements IGuessGame {
         scanner.close();
         System.out.println("Goodbye!");
     }
-						String guessString = guess(playerInput);
-						this.gameScreen.updateGameBoard(guessString, currentRound);
+
+    /**
+     * Mutates state based on player interaction.
+     * - if input is ?, it sets state to display help information.
+     * - if Q, it sets the game state to end.
+     * - otherwise handles player interaction to proceed with the game.
+     *
+     * @param playerInput either a commando from the player to quit or get help, or a guess
+     */
+    private void handlePlayerGuess(String playerInput) {
+        switch (playerInput) {
+            case "?" -> this.gameState = GameState.HELP;
+            case "Q" -> this.gameState = GameState.END;
+            default -> {
+                if (playerInput.length() != correctWord.length()) {
+                    System.out.println(TerminalColors.red(String.format("Invalid input. Please enter a %d-letter word."
+                            , this.correctWord.length())));
+                    break;
+                }
+                String guessString = guess(playerInput);
+                this.gameScreen.updateGameBoard(guessString, currentRound);
+                this.currentRound++;
+                if (playerInput.equals(correctWord)) {
+                    this.gameState = GameState.WON;
+                } else if (currentRound >= maxRounds) {
+                    this.gameState = GameState.LOST;
+                }
+
+            }
+        }
+    }
 
     @Override
-    public void guess(String guess) {
+    public String guess(String guess) {
         StringBuilder sb = new StringBuilder();
-        List<LetterResult> charPlacementResults = getLetterResults(guess);
+        List<LetterResult> charPlacementResults = getLetterFeedback(guess);
         for (int i = 0; i < guess.length(); i++) {
             String guessedChar = "[" + guess.charAt(i) + "]";
             switch (charPlacementResults.get(i)) {
@@ -115,25 +130,22 @@ public class Wordle implements IGuessGame {
                 case INCORRECT -> sb.append(guessedChar.toUpperCase());
             }
         }
-        this.gameScreen.updateGameBoard(sb.toString(), currentRound);
+        return sb.toString();
     }
-	@Override
-	public String guess(String guess) {
-		StringBuilder sb = new StringBuilder();
-		List<LetterResult> charPlacementResults = getLetterResults(guess);
-		for (int i = 0; i < guess.length(); i++) {
-			String guessedChar = "[" + guess.charAt(i) + "]";
-			switch (charPlacementResults.get(i)) {
-				case CORRECT -> sb.append(TerminalColors.green(guessedChar.toUpperCase()));
-				case MISPLACED -> sb.append(TerminalColors.yellow(guessedChar.toUpperCase()));
-				case INCORRECT -> sb.append(guessedChar.toUpperCase());
-			}
-		}
-		return sb.toString();
-	}
 
-    public List<LetterResult> getLetterResults(String guess) {
-        List<LetterResult> letterResults = new ArrayList<>(Collections.nCopies(guess.length(), LetterResult.INCORRECT));
+    /**
+     * Evaluates the player's guess against the correct word to get a list of which word was
+     * guessed right, misplaced and so on.
+     *
+     * @param guess The player's guessed word.
+     * @return A list of {@link LetterResult} where each element corresponds to which color should be used for that index.
+     * - {@link LetterResult#CORRECT} if the letter is in the correct position.
+     * - {@link LetterResult#MISPLACED} if the letter exists in the correct word but is in the wrong position.
+     * - {@link LetterResult#INCORRECT} if the letter does not exist in the correct word.
+     */
+    public List<LetterResult> getLetterFeedback(String guess) {
+        List<LetterResult> letterResults = new ArrayList<>(
+                Collections.nCopies(guess.length(), LetterResult.INCORRECT));
         Map<Character, Integer> letterCount = new HashMap<>();
 
         for (char c : this.correctWord.toCharArray()) {
@@ -150,7 +162,8 @@ public class Wordle implements IGuessGame {
 
         for (int i = 0; i < guess.length(); i++) {
             char guessedChar = guess.charAt(i);
-            if (letterResults.get(i) != LetterResult.CORRECT && letterCount.getOrDefault(guessedChar, 0) > 0) {
+            if (letterResults.get(i) != LetterResult.CORRECT
+                    && letterCount.getOrDefault(guessedChar, 0) > 0) {
                 letterResults.set(i, LetterResult.MISPLACED);
                 letterCount.put(guessedChar, letterCount.get(guessedChar) - 1);
             }
