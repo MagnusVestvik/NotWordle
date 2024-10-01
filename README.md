@@ -3,7 +3,7 @@
 
 ### Prerequisites  
 This project requires **Java 23** to be installed. Ensure that you have the correct version by running the following command:
-"""
+
 ```bash
 java -version
 ```
