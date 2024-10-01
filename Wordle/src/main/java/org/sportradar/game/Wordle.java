@@ -100,6 +100,8 @@ public class Wordle implements IGuessGame {
         scanner.close();
         System.out.println("Goodbye!");
     }
+						String guessString = guess(playerInput);
+						this.gameScreen.updateGameBoard(guessString, currentRound);
 
     @Override
     public void guess(String guess) {
@@ -115,6 +117,20 @@ public class Wordle implements IGuessGame {
         }
         this.gameScreen.updateGameBoard(sb.toString(), currentRound);
     }
+	@Override
+	public String guess(String guess) {
+		StringBuilder sb = new StringBuilder();
+		List<LetterResult> charPlacementResults = getLetterResults(guess);
+		for (int i = 0; i < guess.length(); i++) {
+			String guessedChar = "[" + guess.charAt(i) + "]";
+			switch (charPlacementResults.get(i)) {
+				case CORRECT -> sb.append(TerminalColors.green(guessedChar.toUpperCase()));
+				case MISPLACED -> sb.append(TerminalColors.yellow(guessedChar.toUpperCase()));
+				case INCORRECT -> sb.append(guessedChar.toUpperCase());
+			}
+		}
+		return sb.toString();
+	}
 
     public List<LetterResult> getLetterResults(String guess) {
         List<LetterResult> letterResults = new ArrayList<>(Collections.nCopies(guess.length(), LetterResult.INCORRECT));
